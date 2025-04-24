@@ -54,7 +54,6 @@ process_simulation <- function(num_real_cell, h5_path,r_mean, r_var, r_flag, noi
   result <- estimate_parameters(h5_path, group_id)
   Mean_data <- result$mean_data
   Var_data <- result$var_data
-  #初始化标签
   Datalabel2_mean <- rep("nd", length(Mean_data))
   Datalabel2_var <- rep("nd", length(Mean_data))
   Datalabel2_mean_var <- rep("nd", length(Mean_data))
