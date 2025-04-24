@@ -17,6 +17,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 import keras
+from keras.models import Model
+from keras.layers import Input, Conv1D, MaxPooling1D, Flatten, Dense
+from keras.optimizers import Adam, RMSprop, SGD, Nadam
 import tensorflow as tf
 import numpy as np
 import os
@@ -27,6 +30,11 @@ except:
 print('Using Tensorflow version: {}, '
 		  'and Keras version: {}.'.format(tf.__version__,
 									  keras.__version__))
+
+    # 'optimizer': ['adam', 'rmsprop', 'sgd', 'nadam'],
+    # 'learning_rate': [0.0001, 0.001, 0.01],
+    # 'base_filters': [8, 16, 32],
+    # 'num_layers': [1, 2, 3]
 
 class Classifier_CNN:
 	"""
@@ -45,6 +53,9 @@ class Classifier_CNN:
 			nb_classes (int): The number of classes in the classification problem.
 			verbose (bool): Whether to print detailed information during training. Defaults to False.
 			build (bool): Whether to build the model immediately. Defaults to True.
+			optimizer (str): You can select the optimizer, which defaults to Adam.
+			base_filters (int): The number of convolutional layer base filters, default is 8.
+			num_layers (int): The number of convolution blocks in the model, which is 2 by default.
 		"""
 		self.config = config
 		self.output_directory = config["model_dir"]
@@ -52,6 +63,9 @@ class Classifier_CNN:
 		self.mini_batch_size = config["batch_size"]
 		self.epoch = config["epoch"]
 		self.learning_rate = config["learning_rate"]
+		self.optimizer = config["optimizer"]
+		self.base_filters = config["base_filters"]
+		self.num_layers = config["num_layers"]
 
 		self.sim = config["sim_parm"]
 
@@ -76,26 +90,54 @@ class Classifier_CNN:
 		padding = 'valid'
 		acti=self.acti
 		print("acti:",acti)
-		input_layer = keras.layers.Input(input_shape)
+		if self.optimizer == 'adam':
+			opt = Adam(learning_rate=self.learning_rate)
+		elif self.optimizer == 'rmsprop':
+			opt = RMSprop(learning_rate=self.learning_rate)
+		elif self.optimizer == 'sgd':
+			opt = SGD(learning_rate=self.learning_rate)
+		elif self.optimizer == 'nadam':
+			opt = Nadam(learning_rate=self.learning_rate)
+		else:
+			opt = Adam(learning_rate=self.learning_rate)
 
+		input_layer = Input(input_shape)
 		if input_shape[0] < 60: # for italypowerondemand dataset
 			padding = 'same'
+		x = input_layer
+    
+		for i in range(self.num_layers):
+			x = Conv1D(filters=self.base_filters*(2**i),  # 每层filter数量指数增长
+					kernel_size=3,
+					padding=padding,
+					activation=self.acti)(x)
+			x = MaxPooling1D(pool_size=2)(x)
+		
+		x = Flatten()(x)
+		output_layer = Dense(nb_classes, activation='softmax')(x)
+		
+		model = Model(inputs=input_layer, outputs=output_layer)
+		model.compile(loss='categorical_crossentropy',
+					optimizer=opt,
+					metrics=['accuracy'])
+		
+		
+		# conv1 = keras.layers.Conv1D(filters=8,kernel_size=3,padding=padding,activation=acti)(input_layer)
+		# conv1 = keras.layers.MaxPooling1D(pool_size=2)(conv1)
 
-		conv1 = keras.layers.Conv1D(filters=8,kernel_size=3,padding=padding,activation=acti)(input_layer)
-		conv1 = keras.layers.MaxPooling1D(pool_size=2)(conv1)
 
+		# conv2 = keras.layers.Conv1D(filters=16,kernel_size=3,padding=padding,activation=acti)(conv1)
+		# conv2 = keras.layers.MaxPooling1D(pool_size=2)(conv2)
 
-		conv2 = keras.layers.Conv1D(filters=16,kernel_size=3,padding=padding,activation=acti)(conv1)
-		conv2 = keras.layers.MaxPooling1D(pool_size=2)(conv2)
+		# flatten_layer = keras.layers.Flatten()(conv2)
 
-		flatten_layer = keras.layers.Flatten()(conv2)
+		# output_layer = keras.layers.Dense(units=nb_classes,activation='softmax')(flatten_layer)
 
-		output_layer = keras.layers.Dense(units=nb_classes,activation='softmax')(flatten_layer)
+		# model = keras.models.Model(inputs=input_layer, outputs=output_layer)
 
-		model = keras.models.Model(inputs=input_layer, outputs=output_layer)
-
-		model.compile(loss='categorical_crossentropy', optimizer=keras.optimizers.Adam(learning_rate=self.learning_rate),
-					  metrics=['accuracy'])
+		# model.compile(loss='categorical_crossentropy', optimizer=keras.optimizers.Adam(learning_rate=self.learning_rate),
+		# 			  metrics=['accuracy'])
+		
 		if self.sim is None:
 
 			file_path = self.output_directory + '/'+'best_model.h5'

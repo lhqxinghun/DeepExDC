@@ -84,6 +84,9 @@ Training process related parameters
 | batch_size | int | Optional | Number of samples per gradient update | 16 |
 | epoch | int | Optional | Number of epochs to train the model | 60 |
 | learning_rate | float | Optional | Learning rate for the model | 0.001 |
+| optimizer | str | Optional | Select the optimizer| adam,['adam', 'rmsprop', 'sgd', 'nadam'] |
+| base_filters | int | Optional | The number of convolutional layer base filters | 8 |
+| num_layers | int | Optional | The number of convolution blocks in the model | 2 |
 | sim_parm | str | Optional | Simulation parameters, if any | "group2_run1 |
 | model_dir | str | Optional | Directory to save the model files | "/path/to/output/dc_result/cnn" |
 | model_path | str | Optional | Path to save the best model file | "/path/to/output/dc_result/cnn/best_model.h5" |
@@ -92,6 +95,8 @@ Shapley explanation related parameters
 | Parameter Name | Type | Required/Optional | Description | Example |
 |----------------|------|------------------|-------------|---------|
 | explain_mode | str | Optional | Mode for explaining the model | "test" |
+| α | int | Optional | Select the number of samples to use as background data | 100 |
+| β | float | Optional | Select the proportion of the sample you want to interpret | 0.2 |
 | random_background | bool | Optional | Whether to use random background | False |
 | shap_dir | str | Optional | Directory to save SHAP files | "/path/to/output/shap" |
 | save_shap_file | bool | Optional | Whether to save SHAP files | False |

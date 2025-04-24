@@ -94,7 +94,7 @@ def train(config):
 		data_smote,label_smote=somote_dataset(data,label)
 		datasets = split_dataset(data_smote,label_smote)
 	else:
-		datasets = split_dataset(data,label,config)
+		datasets = split_dataset(data,label)
 	
 	model_path=fit_classifier(datasets,config)
 	return model_path

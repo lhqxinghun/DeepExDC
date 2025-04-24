@@ -55,9 +55,7 @@ class DeepExDC():
 			from getdiffcompartments import getdiff
 		except:
 			from .getdiffcompartments import getdiff
-		if "shap_path" in self.config:
-			getdiff(config=self.config)
-		elif isinstance(self.shap_obj, str):
+		if isinstance(self.shap_obj, str):
 			self.config["shap_path"] = self.shap_obj
 			getdiff(config=self.config)
 		else:

@@ -33,6 +33,8 @@ class RunSHAP():
 		explain_mode (str): The mode of explanation, either 'all' or 'test'.
 		save_dir (str): The directory to save SHAP results.
 		save_shap_file (bool): A flag to indicate whether to save SHAP values to a file.
+		α (int): Select the number of samples to use as background data.
+		β (float):Select the proportion of the sample you want to interpret.
 
 	Methods:
 		load_data_for_shap(): Load and prepare data for SHAP analysis.
@@ -60,6 +62,8 @@ class RunSHAP():
 		self.explain_mode = config["explain_mode"]
 		self.save_dir = config["shap_dir"]
 		self.save_shap_file = config["save_shap_file"]
+		self.α = config["α"]
+		self.β = config["β"]
 	
 	def load_data_for_shap(self):
 		"""
@@ -74,7 +78,7 @@ class RunSHAP():
 			X = np.expand_dims(data_np, axis=2)
 			dataset =(X,label)
 		else:
-			X_train, X_test, y_train, y_test = train_test_split(data_np, label, test_size=0.2, random_state=123)
+			X_train, X_test, y_train, y_test = train_test_split(data_np, label, test_size=self.β, random_state=123)
 
 
 			X_train_3d = np.expand_dims(X_train, axis=2)
@@ -231,11 +235,11 @@ class RunSHAP():
 		y_train['filter'] = self.model_eval(X_train_3d,label_train)
 		y['filter'] = self.model_eval(X_test_3d,label)
 		if self.config["random_background"] is True:
-			if X_train_3d.shape[0]<100:
-				background=X_train_3d[np.random.choice(X_train_3d.shape[0], 100, replace=True)]
+			if X_train_3d.shape[0]<self.α:
+				background=X_train_3d[np.random.choice(X_train_3d.shape[0], self.α, replace=True)]
 			else:
 				
-				background=X_train_3d[np.random.choice(X_train_3d.shape[0], 100, replace=False)]
+				background=X_train_3d[np.random.choice(X_train_3d.shape[0], self.α, replace=False)]
 	
 			shap_arr = self.cal_shap_arr(background,X_test_3d)
 		else:
@@ -249,11 +253,11 @@ class RunSHAP():
 				y_list.append(y_item)
 				X_train_item = self.select_background(X_train_3d,y_train,select_list[:i] + select_list[i+1:])
 
-				if X_train_item.shape[0]<100:
-					background=X_train_item[np.random.choice(X_train_item.shape[0], 100, replace=True)]
+				if X_train_item.shape[0]<self.α:
+					background=X_train_item[np.random.choice(X_train_item.shape[0], self.α, replace=True)]
 				else:
 				
-					background=X_train_item[np.random.choice(X_train_item.shape[0], 100, replace=False)]
+					background=X_train_item[np.random.choice(X_train_item.shape[0], self.α, replace=False)]
 				e = shap.DeepExplainer(self.model, background)
 				print(f"e.expected_value:{e.expected_value}")
 				sample_list = []
@@ -285,11 +289,11 @@ class RunSHAP():
 		y = y.loc[filtered_indices]
 		
 		if self.config["random_background"] is True:
-			if X.shape[0]<100:
-				background=X[np.random.choice(X.shape[0], 100, replace=True)]
+			if X.shape[0]<self.α:
+				background=X[np.random.choice(X.shape[0], self.α, replace=True)]
 			else:
 				
-				background=X[np.random.choice(X.shape[0], 100, replace=False)]
+				background=X[np.random.choice(X.shape[0], self.α, replace=False)]
 	
 			shap_arr = self.cal_shap_arr(background,X)
 		else:

@@ -36,6 +36,16 @@ def get_config(config_path = "./config.jSON"):
 		config["model_path"] = config.get("model_path",f'{config["model_dir"]}/{config["sim_parm"]}_best_model.h5')
 	else:
 		config["model_path"] = config.get("model_path",f'{config["model_dir"]}/best_model.h5')
+
+
+
+	config["optimizer"] = config.get("optimizer","adam")
+	config["base_filters"] = config.get("base_filters",8)
+	config["num_layers"] = config.get("num_layers",2)
+
+	config["α"] = config.get("α", 100)
+	config["β"] = config.get("β", 0.2)
+
 	config["explain_mode"] = config.get("explain_mode","test")
 	config["random_background"] = config.get("random_background", False)
 	config["shap_dir"] = config.get("shap_dir",f'{config["output_dir"]}/shap')

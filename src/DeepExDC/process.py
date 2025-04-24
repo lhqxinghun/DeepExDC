@@ -192,7 +192,10 @@ def load_shap_arr(config,shap_path=None):
 	group = config['group']
 
 	bin_keys = [key for key in X[group].keys() if 'bin_' in key]
-	shap_data = np.array([X[group][key][()] for key in bin_keys])
+
+	bin_nums=['bin_'+str(x+1) for x in range(len(bin_keys))]
+	shap_data = np.array([X[group][key][()] for key in bin_nums])
+	# shap_data = np.array([X[group][key][()] for key in bin_keys])
 
 	shap_label = pd.DataFrame({
 		'cell_id': [x.decode('utf-8') for x in X[group]['label']['cell_id']],
