@@ -303,10 +303,10 @@ process_simulation <- function(num_real_cell, h5_path,r_mean, r_var, r_flag, noi
     if (changetype[i] == 3&group_num[i] == 2) {
       Datalabel2_var <- resultlabel$datalabel
     }
-    if (group_num[i] == 4&group_num[i] == 2) {
+    if (changetype[i] == 4&group_num[i] == 2) {
       Datalabel2_mean <- resultlabel$datalabel
     } 
-    if (group_num[i] == 5&group_num[i] == 2) {
+    if (changetype[i] == 5&group_num[i] == 2) {
       Datalabel2_var <- resultlabel$datalabel
     } 
     if (changetype[i] == 6&group_num[i] == 2) {
